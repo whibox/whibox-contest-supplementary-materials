@@ -1,0 +1,72 @@
+#+TITLE: Supplementary Materials for the WhibOx Contest Edition 4
+
+
+This repository provides the supplementary materials for the [[https://whibox.io/contests/2024/][WhibOx Contest Edition 4]].
+Specifically, it has the following three main contents:
+
+1. A CMD tool for generate a key pair given a seed.
+2. CMD tools for generating / verifying EC-Schnorr signature.
+3. The reference implementation in C using the [[https://gmplib.org/][GNU GMP]] library.
+
+* Prerequisites
+
+In order to use this repository, one has to install
+
+- [[https://www.gnu.org/software/make/][GNU Make]] (tested with version 4.3)
+- [[https://gcc.gnu.org/][GCC]] version 13.2.1
+- [[https://www.python.org/][Python 3.11]] (tested with version 3.11.9)
+- [[https://click.palletsprojects.com/en/7.x/][Click 7.x]] (test with version 8.1.7)
+- [[https://gmplib.org/][GNU GMP]] version 6.3.0
+- Optional: [[https://github.com/seccomp/libseccomp][libseccomp2]] version 2.5.5
+
+[[https://www.kernel.org/doc/html/v4.19/userspace-api/seccomp_filter.html][SECCOMP BPF filters]] are used for system calls filtering, and reflects the compilation on the WhibOx server side. Since SECCOMP has adherence to
+the Linux kernel, you can compile the project without it with:
+
+#+begin_src
+$ NO_SECCOMP=1 make
+#+end_src
+
+This will deactivate the SECCOMP usage for testing purposes on non-Linux platforms (e.g. Mac OS) or if one wants to perform tests
+without the system calls filtering.
+
+* Usage
+
+** Generate EC key pairs from seed
+
+#+begin_src
+$ ./keygen.py CHES2024
+seed: seed = CHES2024
+private key: d = DE6B0B3C9F75548B0EBC6FA5D9FFDA83AD5306F88A403EDA624BDC27C15B00BC
+public key:  Q = (x = B3AF1DC41998870D6B574BCF5C0935BB1F21C33A736FED99D8C50FC7CB038AB4, y = B3BA1B8C2F68037D149F2E0500C0B6C7D5BAEEB47B4533809FD3D902ECE63345)
+encoded public key:  B3AF1DC41998870D6B574BCF5C0935BB1F21C33A736FED99D8C50FC7CB038AB4B3BA1B8C2F68037D149F2E0500C0B6C7D5BAEEB47B4533809FD3D902ECE63345
+#+end_src
+
+** Generate and verify EC-Schnorr signature
+
+Notice the signature here is not deterministic.
+
+#+begin_src
+./ec_schnorr_sign.py DE6B0B3C9F75548B0EBC6FA5D9FFDA83AD5306F88A403EDA624BDC27C15B00BC
+Signature: BC50F1A20D08A0530BE7B56E668E85473CF7769C982B8EF6E7F9791D016F7CEB5F0EEFA5927576F470C965BF37461BAC67D5C5F774ECB08B78925B178FDC63E4
+
+$ ./ec_schnorr_verify.py B3AF1DC41998870D6B574BCF5C0935BB1F21C33A736FED99D8C50FC7CB038AB4B3BA1B8C2F68037D149F2E0500C0B6C7D5BAEEB47B4533809FD3D902ECE63345 BC50F1A20D08A0530BE7B56E668E85473CF7769C982B8EF6E7F9791D016F7CEB5F0EEFA5927576F470C965BF37461BAC67D5C5F774ECB08B78925B178FDC63E4
+Good signature :)
+#+end_src
+
+
+** The reference implementation
+
+The source code of the reference implementation can be found in [[dECDSA.c][dECDSA.c]].
+Try =make && ./dECDSA= to test it with the SECCOMP filtering (reflecting what the WhibOx server will execute), or
+with =NO_SECCOMP=1 make && ./dECDSA= without the SECCOMP filtering for testing purposes.
+
+#+begin_src
+$ xxd -ps -c 64 -u test_hash
+F7FD41E28DFCCA32C1CEEF637C202CA6E99E57F18AFEF957DF0866B4CDD60F5C
+
+$ ./dECDSA <test_hash | xxd -ps -c 128 -u
+8007ABC1CD96650531BD8039893E8CF549A52D26E2A8A0E4700087523A7156A4AA0A7464CCA7BB14EB75FDC829034CFE82E5C47EE30E07B17B75F387ECBB7168
+
+./ecdsa_verify.py B3AF1DC41998870D6B574BCF5C0935BB1F21C33A736FED99D8C50FC7CB038AB4B3BA1B8C2F68037D149F2E0500C0B6C7D5BAEEB47B4533809FD3D902ECE63345 F7FD41E28DFCCA32C1CEEF637C202CA6E99E57F18AFEF957DF0866B4CDD60F5C 8007ABC1CD96650531BD8039893E8CF549A52D26E2A8A0E4700087523A7156A4AA0A7464CCA7BB14EB75FDC829034CFE82E5C47EE30E07B17B75F387ECBB7168
+Good signature :)
+#+end_src
