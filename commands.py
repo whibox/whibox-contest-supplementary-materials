@@ -8,9 +8,9 @@ from nist_p256 import NIST_P256
 
 
 @click.command()
-@click.argument('seed', default="CHES2021")
+@click.argument('seed', default="CHES2024")
 def cmd_keygen(seed):
-    # CHES 2021 will start from September 12, 2021
+    # CHES 2024 will start from September 4, 2024
     random.seed(seed)
     d = random.randint(1, NIST_P256.n-1)
     Q = NIST_P256.scalar_multiplication(d)
