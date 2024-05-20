@@ -1,6 +1,7 @@
 #include <seccomp.h> /* libseccomp */
 #include <sys/prctl.h> /* prctl */
 #include <unistd.h> /* syscalls */
+#include <sys/mman.h>
 
 extern void ECDSA_256_sign(unsigned char sig[64], const unsigned char hash[32]);
 
@@ -25,7 +26,8 @@ void seccomp_it(void)
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 1, SCMP_A0(SCMP_CMP_EQ, 1)); /* write only on stdout */
   /* Allocation related syscalls */
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mmap), 0);
+  /* Enforce non-executable pages */
+  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mmap), 1, SCMP_A2_32(SCMP_CMP_MASKED_EQ, ~(PROT_NONE | PROT_READ | PROT_WRITE)));
   seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(munmap), 0);
 
   /* Load the SECCOMP filter */
