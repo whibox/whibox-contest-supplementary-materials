@@ -77,7 +77,8 @@ The system calls that are allowed in [[main.c][main.c]] are: =rt_sigreturn=, =ex
 file descriptor 1 (i.e. =stdout=), =brk=, =mmap= (with the restriction of non-executable pages, i.e. =PROT_EXEC= is forbidden), and =munmap=. Any system call
 not conforming to this list will induce a =SIGSYS= or =SIGSEGV= immediately killing the process.
 
-For debugging purposes to check if your binary is compliant and of not why, you can use the =strace= utility that logs all the system calls. For instance,
+For debugging purposes to check if your binary is compliant and of not why, you can use the =strace= utility
+(should be packaged on most Linux distros) that logs all the system calls. For instance,
 on the reference implementation:
 
 #+begin_src
@@ -98,7 +99,7 @@ exit_group(0)                           = ?
 8007ABC1CD96650531BD8039893E8CF549A52D26E2A8A0E4700087523A7156A4AA0A7464CCA7BB14EB75FDC829034CFE82E5C47EE30E07B17B75F387ECBB7168
 #+end_src
 
-As one can see, everything went fine since the program ==exited with 0== and the output is indeed printed on the console.
+As one can see, everything went fine since the program =exited with 0= and the expected output is indeed printed on the console.
 On the same implementation where we add a =printf("[+] Hello from ECDSA_256_sign\n");= at the very beginning of the
 =ECDSA_256_sign= function, we get:
 
