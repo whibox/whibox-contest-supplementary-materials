@@ -98,6 +98,7 @@ exit_group(0)                           = ?
 8007ABC1CD96650531BD8039893E8CF549A52D26E2A8A0E4700087523A7156A4AA0A7464CCA7BB14EB75FDC829034CFE82E5C47EE30E07B17B75F387ECBB7168
 #+end_src
 
+As one can see, everything went fine since the program ==exited with 0== and the output is indeed printed on the console.
 On the same implementation where we add a =printf("[+] Hello from ECDSA_256_sign\n");= at the very beginning of the
 =ECDSA_256_sign= function, we get:
 
@@ -112,5 +113,5 @@ newfstatat(1, 0x7f889a0d5bd5, 0x7ffe214000c0, AT_EMPTY_PATH) = 262
 +++ killed by SIGSYS +++
 #+end_src
 
-Note the ==killed by SIGSYS== confirming that the process was indeed killed because of SECCOMP. This is due in this case
+Note the =killed by SIGSYS= confirming that the process was indeed killed because of SECCOMP. This is due in this case
 to the usage of the =newfstatat= system call by the =libc= in the underlying =printf= implementation.
