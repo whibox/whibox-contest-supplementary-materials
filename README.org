@@ -74,8 +74,8 @@ Good signature :)
 * SECCOMP and system calls filtering
 
 The system calls that are allowed in [[main.c][main.c]] are: =rt_sigreturn=, =exit=, =exit_group=, =read= on file descriptor 0 (i.e. =stdin=), =write= on
-file descriptor 1 (i.e. =stdout=), =brk=, =mmap= (with the restriction of non-executable pages, i.e. =PROT_EXEC= is formbidden), and =munmap=. Any system call
-not conforming to this list will be killed.
+file descriptor 1 (i.e. =stdout=), =brk=, =mmap= (with the restriction of non-executable pages, i.e. =PROT_EXEC= is forbidden), and =munmap=. Any system call
+not conforming to this list will induce a =SIGSYS= or =SIGSEGV= immediately killing the process.
 
 For debugging purposes to check if your binary is compliant and of not why, you can use the =strace= utility that logs all the system calls. For instance,
 on the reference implementation:
