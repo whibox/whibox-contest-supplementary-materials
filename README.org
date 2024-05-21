@@ -70,3 +70,47 @@ $ ./dECDSA <test_hash | xxd -ps -c 128 -u
 ./ecdsa_verify.py B3AF1DC41998870D6B574BCF5C0935BB1F21C33A736FED99D8C50FC7CB038AB4B3BA1B8C2F68037D149F2E0500C0B6C7D5BAEEB47B4533809FD3D902ECE63345 F7FD41E28DFCCA32C1CEEF637C202CA6E99E57F18AFEF957DF0866B4CDD60F5C 8007ABC1CD96650531BD8039893E8CF549A52D26E2A8A0E4700087523A7156A4AA0A7464CCA7BB14EB75FDC829034CFE82E5C47EE30E07B17B75F387ECBB7168
 Good signature :)
 #+end_src
+
+* SECCOMP and system calls filtering
+
+The system calls that are allowed in [[main.c][main.c]] are: =rt_sigreturn=, =exit=, =exit_group=, =read= on file descriptor 0 (i.e. =stdin=), =write= on
+file descriptor 1 (i.e. =stdout=), =brk=, =mmap= (with the restriction of non-executable pages, i.e. =PROT_EXEC= is formbidden), and =munmap=. Any system call
+not conforming to this list will be killed.
+
+For debugging purposes to check if your binary is compliant and of not why, you can use the =strace= utility that logs all the system calls. For instance,
+on the reference implementation:
+
+#+begin_src
+$ strace ./dECDSA < test_hash | xxd -ps -c 128 -u
+execve("./dECDSA", ["./dECDSA"], 0x7fff8395d930 /* 58 vars */) = 0
+brk(NULL)                               = 0x55b01e8f1000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fb9917ec000
+...
+brk(NULL)                               = 0x55b01e8f1000
+brk(0x55b01e912000)                     = 0x55b01e912000
+prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)  = 0
+seccomp(SECCOMP_SET_MODE_FILTER, 0, 0x55b01e8f3040) = 0
+read(0, 0x7fff0f457270, 32)             = 32
+write(1, 0x7fff0f457290, 64)            = 64
+read(0, "", 32)                         = 0
+exit_group(0)                           = ?
++++ exited with 0 +++
+8007ABC1CD96650531BD8039893E8CF549A52D26E2A8A0E4700087523A7156A4AA0A7464CCA7BB14EB75FDC829034CFE82E5C47EE30E07B17B75F387ECBB7168
+#+end_src
+
+On the same implementation where we add a =printf("[+] Hello from ECDSA_256_sign\n");= at the very beginning of the
+=ECDSA_256_sign= function, we get:
+
+#+begin_src
+$ strace ./dECDSA < test_hash | xxd -ps -c 128 -u
+execve("./dECDSA", ["./dECDSA"], 0x7fff781d34f0 /* 58 vars */) = 0
+brk(NULL)                               = 0x562914847000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f607ba64000
+...
+read(0, 0x7ffe21400340, 32)             = 32
+newfstatat(1, 0x7f889a0d5bd5, 0x7ffe214000c0, AT_EMPTY_PATH) = 262
++++ killed by SIGSYS +++
+#+end_src
+
+Note the ==killed by SIGSYS== confirming that the process was indeed killed because of SECCOMP. This is due in this case
+to the usage of the =newfstatat= system call by the =libc= in the underlying =printf= implementation.
