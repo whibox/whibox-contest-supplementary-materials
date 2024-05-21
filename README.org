@@ -79,7 +79,7 @@ not conforming to this list will induce a =SIGSYS= or =SIGSEGV= immediately kill
 
 For debugging purposes to check if your binary is compliant and of not why, you can use the =strace= utility
 (should be packaged on most Linux distros) that logs all the system calls. For instance,
-on the reference implementation:
+on the reference implementation compiled with the default options (i.e. with active SECCOMP):
 
 #+begin_src
 $ strace ./dECDSA < test_hash | xxd -ps -c 128 -u
