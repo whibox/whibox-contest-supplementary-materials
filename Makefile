@@ -5,8 +5,8 @@ LDLIBS=-lgmp
 ifeq ($(NO_SECCOMP),1)
 CFLAGS += -DNO_SECCOMP
 else
-CFLAGS += -Wno-prio-ctor-dtor
-LDLIBS += -lseccomp
+CFLAGS += -Wno-prio-ctor-dtor -fPIC -fPIE
+LDLIBS += -lseccomp -pie
 endif
 
 all: dECDSA
