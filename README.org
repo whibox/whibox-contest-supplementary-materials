@@ -77,8 +77,8 @@ The system calls that are allowed in [[main.c][main.c]] are: =rt_sigreturn=, =ex
 file descriptor 1 (i.e. =stdout=), =brk=, =mmap= (with the restriction of non-executable pages, i.e. =PROT_EXEC= is forbidden), and =munmap=. Any system call
 not conforming to this list will induce a =SIGSYS= or =SIGSEGV= immediately killing the process.
 
-For debugging purposes to check if your binary is compliant and of not why, you can use the =strace= utility
-(should be packaged on most Linux distros) that logs all the system calls. For instance,
+For debugging purposes to check if your binary is compliant and if not why, you can use the =strace= utility
+(it should be packaged on most Linux distros) that logs all the system calls. For instance,
 on the reference implementation compiled with the default options (i.e. with active SECCOMP):
 
 #+begin_src
@@ -116,3 +116,7 @@ newfstatat(1, 0x7f889a0d5bd5, 0x7ffe214000c0, AT_EMPTY_PATH) = 262
 
 Note the =killed by SIGSYS= confirming that the process was indeed killed because of SECCOMP. This is due in this case
 to the usage of the =newfstatat= system call by the =libc= in the underlying =printf= implementation.
+
+If you want to locally reproduce the excat compilation process with SECCOMP that will take place on the server, you can
+look at the [[https://github.com/CryptoExperts/whibox_contest_submission_server/blob/whibox2024/][submission server repository]]
+and how to locally deploy it.
