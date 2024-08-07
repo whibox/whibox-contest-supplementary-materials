@@ -77,7 +77,7 @@ class NIST_P256:
             return self + (-Q)
 
         def __rmul__(self, scalar: int) -> "Point":
-            R = NIST_P256.Point(Modular(0), Modular(0))
+            R = NIST_P256.Point(NIST_P256.Modular(0), NIST_P256.Modular(0))
 
             for i, b in enumerate(bin(scalar)[2:]):
                 R = R + R
