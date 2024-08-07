@@ -35,7 +35,7 @@ class NIST_P256:
             y_inv = y ** (self.p-2)
             return self * y_inv
 
-        def __eq__(self, y):
+        def __eq__(self, y: "Modular"):
             return ((self.val - y.val) % self.p) == 0
 
         def __repr__(self):
@@ -94,7 +94,7 @@ class NIST_P256:
 
         @property
         def is_at_infinity(self):
-            return self.x == self.y == 0
+            return self.x == self.y == NIST_P256.Modular(0)
 
         @property
         def is_on_curve(self):
@@ -102,7 +102,7 @@ class NIST_P256:
 
         @classmethod
         def infinity(cls):
-            return NIST_P256.Point(0, 0)
+            return NIST_P256.Point(NIST_P256.Modular(0), NIST_P256.Modular(0))
 
     G = Point(
         Modular(0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296),
